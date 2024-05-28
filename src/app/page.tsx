@@ -21,7 +21,7 @@ export default function Home() {
         <ul>{articles.map(({ title, publicationDate, summary, link, tags }) => <div key={link} style={{ width: "30vw", border: "solid 1px black", borderRadius: "5px", padding: "1em", margin: "0.5em" }}>
           <div style={{ display: "flex", width: "100%", justifyContent: "space-between", marginBottom: "0.5em" }} >
             <h3 style={{ maxWidth: "80%" }}><Link href={link}>{title}</Link></h3>
-            <LocaleDate date={publicationDate} />
+            <LocaleDate date={publicationDate!} />
           </div>
           {summary}
           {tags.length ? <div style={{ marginTop: "0.3em" }}><b>Tags:</b> {tags.join(", ")} </div> : <></>}
