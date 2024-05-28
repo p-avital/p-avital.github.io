@@ -1,16 +1,8 @@
-import Image from "next/image";
-import styles from "./page.module.css";
-import { ArticleHeader } from "@/types/Article";
-import { LocaleDate } from "@/components/Date";
-
-import { header as introductions } from "@/app/introductions/page"
-import { header as rustconf2023 } from "@/app/stabby-rustconf2023/page"
 import Link from "next/link";
+import styles from "./page.module.css";
+import { LocaleDate } from "@/components/Date";
+import { articles } from "./articles";
 
-export const articles: ArticleHeader[] = [
-  introductions, rustconf2023
-
-].sort((a, b) => b.publicationDate.getTime() - a.publicationDate.getTime());
 
 export default function Home() {
   return (
