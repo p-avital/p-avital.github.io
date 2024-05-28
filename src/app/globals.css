@@ -96,12 +96,14 @@ body {
 }
 
 a {
-  color: inherit;
+  color: mediumvioletred;
   text-decoration: none;
 }
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+a:visited {
+  color: violet;
 }
+
+html {
+  color-scheme: dark;
+}
+
