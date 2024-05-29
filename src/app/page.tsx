@@ -1,31 +1,32 @@
+'use client'
 import Link from "next/link";
-import styles from "./page.module.css";
 import { LocaleDate } from "@/components/Date";
 import { articles } from "./articles";
+import { useState } from "react";
 
 
 export default function Home() {
+  const [selectedTags, setSelectedTags] = useState([] as string[]);
+  const tags = articles.flatMap(a => a.tags).sort().filter((tag, i, arr) => !arr.slice(0, i).includes(tag))
   return (
-    <main className={styles.main}>
-      <h1>Welcome to my blog!</h1>
+    <main className="main">
+      <h1>The Fox's Den</h1>
       <section>
-        <h2>This is a site with the following goals</h2>
-        <ul>
-          <li>Share knowledge about cool stuff</li>
-          <li>Be terse: no padding out articles, I won't run any ads anyway</li>
-          <li>Not a single AI paragraph (unless this would be the subject of the article)</li>
-          <li>Disclose any conflict of interest when talking about <em>my</em> cool stuff</li>
-        </ul>
-      </section>
-      <section>
-        <ul>{articles.map(({ title, publicationDate, summary, link, tags }) => <div key={link} style={{ width: "30vw", border: "solid 1px black", borderRadius: "5px", padding: "1em", margin: "0.5em" }}>
+        <h2>Welcome to my blog! Have some articles!</h2>
+        <p>This is a blog about computer science, math, video games... All the nerd stuff!</p>
+        <p>If you're wondering whose blog this is, you might be interested in my <Link href="/introductions">introduction post</Link>.</p>
+        {tags.length ? <p>Tags: {tags.map(tag => <button key={tag} onClick={() => {
+          const index = selectedTags.indexOf(tag);
+          if (index === -1) { setSelectedTags([...selectedTags, tag]) } else { setSelectedTags([...selectedTags.slice(0, index), ...selectedTags.slice(index + 1)]) }
+        }} style={{ backgroundColor: selectedTags.includes(tag) ? "violet" : "black", margin: "0.4ex" }}>{tag}</button>)}</p> : <></>}
+        {articles.filter(({ tags }) => selectedTags.length == 0 || selectedTags.some(tag => tags.includes(tag))).map(({ title, publicationDate, summary, link, tags }) => <div key={link} style={{ border: "solid 1px black", borderRadius: "5px", padding: "1em", margin: "0.5em" }}>
           <div style={{ display: "flex", width: "100%", justifyContent: "space-between", marginBottom: "0.5em" }} >
             <h3 style={{ maxWidth: "80%" }}><Link href={link}>{title}</Link></h3>
             <LocaleDate date={publicationDate!} />
           </div>
           {summary}
           {tags.length ? <div style={{ marginTop: "0.3em" }}><b>Tags:</b> {tags.join(", ")} </div> : <></>}
-        </div>)}</ul>
+        </div>)}
       </section>
       This site is still very much under construction work, but expect articles to come up soon(TM)!
     </main>

@@ -78,12 +78,21 @@
   padding: 0;
   margin: 0;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  text-align: justify;
 }
 
 html,
 body {
-  max-width: 100vw;
+  width: min(100vw, 60em);
   overflow-x: hidden;
+  margin: auto;
+  min-height: 100vh;
+}
+.main {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
 }
 
 body {
@@ -114,3 +123,9 @@ code {
   padding: 0.1ex 0.6ex 0.1ex 0.6ex;
 }
 
+p {
+  margin-top: 1ex;
+}
+h2 {
+  margin-top: 2ex;
+}

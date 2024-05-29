@@ -9,5 +9,5 @@ export interface ArticleHeader {
 }
 export interface Article {
   header: ArticleHeader;
-  children: ReactElement | string;
+  children: ReactElement | ReactElement[] | string;
 }
