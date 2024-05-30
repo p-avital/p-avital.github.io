@@ -2,8 +2,13 @@ import { ArticleHeader } from "@/types/Article";
 
 import { header as introductions } from "@/app/introductions/header";
 import { header as rustconf2023 } from "@/app/stabby-rustconf2023/header";
+import { header as outer_wilds } from "@/app/outer-wilds/header";
 
-export const articles: ArticleHeader[] = [introductions, rustconf2023]
+export const articles: ArticleHeader[] = [
+  introductions,
+  rustconf2023,
+  outer_wilds,
+]
   .filter(
     (item) =>
       item.publicationDate && item.publicationDate.getTime() <= Date.now()
