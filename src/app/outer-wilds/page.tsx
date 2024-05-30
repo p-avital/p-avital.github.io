@@ -8,18 +8,24 @@ interface Nomai {
 	next?: Nomai[]
 }
 
-function ButtonTree({ nomai, position = [], setPosition, currentPosition }: { nomai: Nomai, currentPosition: number[] | undefined, position?: number[], setPosition: (position: number[]) => any }) {
+function ButtonTree({ nomai, position = [], setPosition, currentPosition, disable = false }: { nomai: Nomai, currentPosition: number[] | undefined, position?: number[], setPosition: (position: number[]) => any, disable?: boolean }) {
 	return <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-		<button onClick={() => setPosition(position)} style={{ color: currentPosition ? "white" : "black", margin: "0.3ex" }}>::)</button>
+		<button onClick={() => setPosition(position)} style={{ color: currentPosition ? "white" : "black", margin: "0.3ex" }} disabled={disable}>::)</button>
 		{nomai.next ? <div style={{ display: "flex" }}>{
 			nomai.next.map((monai, i) => <ButtonTree
 				key={i}
 				setPosition={setPosition}
 				nomai={monai}
 				position={[...position, i]}
-				currentPosition={currentPosition?.[0] == i ? currentPosition?.slice(1) : undefined} />)
+				currentPosition={currentPosition?.[0] == i ? currentPosition?.slice(1) : undefined}
+				disable={disable || !currentPosition}
+			/>)
 		}</div> : <></>}
 	</div>
+}
+
+function Screen({ children }: { children: ReactElement }) {
+	return <div style={{ fontFamily: "Consolas, monospace", width: "100%" }}>{children}</div>
 }
 
 function TranslatorTool({ nomai }: { nomai: Nomai }) {
@@ -33,7 +39,7 @@ function TranslatorTool({ nomai }: { nomai: Nomai }) {
 	}
 	return <div>
 		<ButtonTree setPosition={setPosition} nomai={nomai} currentPosition={position} />
-		<div style={{ fontFamily: "Consolas, monospace", width: "100%" }}>{selected.text}</div>
+		<Screen>{selected.text}</Screen>
 	</div>
 }
 
@@ -43,10 +49,18 @@ export default function Page() {
 			One that changes how you perceive some of the things around you?</>,
 		next: [
 			{
-				text: <>Outer wild is one of these games. It's done this to thousands of us.<br />
-					It's like a cognito-hazard, and now, I'm gonna infect you with it ::)</>
+				text: <>Outer Wilds is one of these games. It's done this to thousands of us.<br />
+					It's like a cognito-hazard, and now, I'm gonna infect you with it ::)</>,
+				next: [{
+					text: <>How can the Outer Wilds be described?</>,
+					next: [
+						{ text: <>It's a five years old video game.</> },
+						{ text: <>It's a work of genius.</> },
+						{ text: <>It's an escape game... In space!</> }
+					]
+				}]
 			},
-			{ text: <>Oh? You have? Was it Outer Wilds? Because if it wasn't, you should probably not go any further in this branch.</> },
+			{ text: <>Oh? You have? Was it Outer Wilds?<br />Because if it wasn't, you should probably not go any further in this branch.</> },
 		],
 	}} /></Post>
 }
