@@ -2,28 +2,170 @@
 import { header } from './header'
 import { Post } from "@/components/Post";
 import Link from 'next/link';
-import { ReactElement, useState } from "react";
-import { text } from 'stream/consumers';
+import { CSSProperties, ReactElement, useEffect, useRef, useState } from "react";
+import { alphabet, Vec2 } from '@/components/Nomai';
+
+interface SpiralArgs { textLength: number, root: Vec2, rootAngle: number, clockwise: boolean, scale: number }
+class GoldenSpiral {
+  length: number
+  shift: Vec2
+  beta: number
+  rootAngle: number
+  scale: number
+  angleScale: number
+  textLength: number
+  constructor({ textLength = 10,
+    root = new Vec2(0, 0),
+    rootAngle = 0,
+    scale = 1,
+    clockwise = true }: SpiralArgs) {
+    this.textLength = textLength
+    this.length = 0.8 + (0.15 - 0.3 * Math.exp(-textLength))
+    const phi = (1 + Math.sqrt(5)) / 2
+    this.beta = Math.PI / (2 * Math.log(phi))
+    this.scale = scale
+    this.angleScale = clockwise ? -1 : 1
+    this.rootAngle = rootAngle + Math.atan(1 / this.beta) * this.angleScale + (clockwise ? 0 : Math.PI)
+    this.shift = root.sub(this.unrooted(1))
+  }
+  angle(r: number): number { return this.angleScale * this.beta * Math.log(r) + this.rootAngle }
+  radius(angle: number): number {
+    angle -= this.rootAngle
+    if (angle < 0) {
+      angle += 2 * Math.PI
+    }
+    angle *= this.angleScale
+    angle /= this.beta
+    return Math.exp(angle) * this.scale
+  }
+  unrooted(r: number): Vec2 {
+    const angle = this.angle(r)
+    return new Vec2(
+      r * Math.cos(angle) * this.scale,
+      r * Math.sin(angle) * this.scale
+    )
+  }
+  render(t: number): Vec2 { return this.unrooted(1 - (t * this.length)).add(this.shift) }
+  contains(p: Vec2, margin?: number): boolean {
+    p = p.sub(this.shift)
+    const angle = p.angle()
+    margin ??= this.render(1 / this.textLength).sub(this.render(0)).len()
+    const r = this.radius(angle);
+    const len = p.len()
+    return len <= margin + r
+  }
+}
+
+class Stroke {
+  constructor(
+    public start: Vec2,
+    public end: Vec2,
+    public style: string = "white",
+    public width: number = 0.2) { }
+}
+class Triangle {
+  constructor(
+    public a: Vec2,
+    public b: Vec2,
+    public c: Vec2
+  ) { }
+  contains(v: Vec2): boolean { return false }
+}
+class Hitbox {
+  constructor(
+    public predicate: (p: Vec2) => boolean,
+    public callback: (event: React.MouseEvent<HTMLCanvasElement>) => any
+  ) {
+  }
+  checkAndRun(event: React.MouseEvent<HTMLCanvasElement>, translated: Vec2) {
+    if (this.predicate(translated)) {
+      this.callback(event)
+    }
+  }
+}
+function Canvas({ strokes, hitboxes, width, height, style }: { strokes: Stroke[], hitboxes: Hitbox[], width: number, height: number, style?: CSSProperties }) {
+  const canvas: any = useRef(null)
+  useEffect(() => {
+    if (!canvas) { return }
+    const context: CanvasRenderingContext2D = canvas.current.getContext("2d")
+    context.clearRect(0, 0, width, height)
+    context.beginPath();
+    let [minx, maxx, miny, maxy] = [1, 0, 1, 0]
+    for (const { start, end } of strokes) {
+      minx = Math.min(minx, start.x, end.x)
+      miny = Math.min(miny, start.y, end.y)
+      maxx = Math.max(maxx, start.x, end.x)
+      maxy = Math.max(maxy, start.y, end.y)
+    }
+    const scale = Math.min(width / (maxx - minx), height / (maxy - miny))
+
+    for (const stroke of strokes) {
+      context.strokeStyle = stroke.style
+      context.lineWidth = stroke.width
+      context.moveTo((stroke.start.x - minx) * scale, (stroke.start.y - miny) * scale);
+      context.lineTo((stroke.end.x - minx) * scale, (stroke.end.y - miny) * scale);
+      context.stroke()
+    }
+    const triggerHitbox = (event: React.MouseEvent<HTMLCanvasElement>) => {
+      if (!event) { return }
+      const rect = (event.target as any).getBoundingClientRect()
+      const x = event.clientX - rect.left
+      const y = event.clientY - rect.top
+      const translated = new Vec2(
+        x / scale + minx,
+        y / scale + miny
+      )
+      for (const hitbox of hitboxes) {
+        hitbox.checkAndRun(event, translated)
+      }
+    }
+    canvas.current.onmousemove = triggerHitbox
+    canvas.current.onmousedown = triggerHitbox
+  }, [canvas, strokes, hitboxes])
+  return <canvas style={style} ref={canvas} width={width} height={height} />
+}
 
 interface Nomai {
   text: ReactElement
   next?: Nomai[]
 }
 
-function ButtonTree({ nomai, position = [], setPosition, currentPosition, disable = false }: { nomai: Nomai, currentPosition: number[] | undefined, position?: number[], setPosition: (position: number[]) => any, disable?: boolean }) {
-  return <div style={{ display: "grid", }}>
-    <button onClick={() => setPosition(position)} style={{ color: currentPosition ? "white" : "black", margin: "0.3ex", textAlign: "center", minHeight: "2em" }} disabled={disable}>::)</button>
-    {nomai.next ? <div style={{ display: "grid", gridAutoFlow: "column" }}>{
-      nomai.next.map((monai, i) => <ButtonTree
-        key={i}
-        setPosition={setPosition}
-        nomai={monai}
-        position={[...position, i]}
-        currentPosition={currentPosition?.[0] == i ? currentPosition?.slice(1) : undefined}
-        disable={disable || !currentPosition}
-      />)
-    }</div> : <></>}
-  </div>
+function dbg<T>(x: T): T {
+  console.log(x)
+  return x
+}
+function extractText(component: ReactElement | string): string {
+  if (typeof component == "string") { return component }
+  const children = component.props?.children;
+  switch (typeof children) {
+    case 'number':
+    case 'bigint':
+    case 'boolean':
+    case 'symbol':
+    case 'function':
+      return children.toString()
+    case 'string': return children
+    case 'undefined': return ""
+    case 'object':
+      return children.constructor.name == "Array" ? children.map(extractText).join('\n') :
+        extractText(children)
+  }
+}
+
+function generateTree({ nomai, position = [], setPosition, currentPosition, spiralArgs = {}, disable = false }: { nomai: Nomai, currentPosition: number[] | undefined, position?: number[], setPosition: (position: number[]) => any, disable?: boolean, spiralArgs?: Partial<SpiralArgs> }, strokes: Stroke[], hitboxes: Hitbox[]): [Stroke[], Hitbox[],] {
+  const text = extractText(nomai.text);
+  const args: SpiralArgs = {
+    scale: 0.6, root: new Vec2(1, 0), rootAngle: 0, clockwise: true, textLength: text.length, ...spiralArgs
+  }
+  const spiral = new GoldenSpiral(args)
+  alphabet.translate(text, (t) => spiral.render(t), ([start, end]) => { strokes.push(new Stroke(start, end)); })
+  hitboxes.push(new Hitbox((p) => spiral.contains(p), (e) => { console.log(e.buttons) }))
+  return [strokes, hitboxes]
+}
+
+function ButtonTree(args: { nomai: Nomai, currentPosition: number[] | undefined, position?: number[], setPosition: (position: number[]) => any, disable?: boolean }) {
+  const [strokes, hitboxes] = generateTree(args, [], [])
+  return <Canvas strokes={strokes} hitboxes={hitboxes} width={800} height={1000} />
 }
 
 function Screen({ children }: { children: ReactElement }) {
@@ -39,7 +181,7 @@ function TranslatorTool({ nomai }: { nomai: Nomai }) {
   if (!selected) {
     return <>You reached an easter egg! <button onClick={() => setPosition([])}>Get back to safety</button></>
   }
-  return <div>
+  return <div style={{ width: "100%" }}>
     <ButtonTree setPosition={setPosition} nomai={nomai} currentPosition={position} />
     <Screen>{selected.text}</Screen>
   </div>
@@ -90,5 +232,6 @@ export default function Page() {
           }]
         },
       ],
-    }} /></Post>
+    }} />
+  </Post>
 }

@@ -1,2 +1,4 @@
-node_modules/**
-.next
+**/node_modules
+**/.next
+**/target
+**/Cargo.lock
