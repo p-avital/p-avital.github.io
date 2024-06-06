@@ -149,16 +149,45 @@ function extractText(component: ReactElement | string): string {
         extractText(children)
   }
 }
-
-function generateTree({ nomai, position = [], setPosition, currentPosition, spiralArgs = {}, disable = false }: { nomai: Nomai, currentPosition: number[] | undefined, position?: number[], setPosition: (position: number[]) => any, disable?: boolean, spiralArgs?: Partial<SpiralArgs> }, strokes: Stroke[], hitboxes: Hitbox[]): [Stroke[], Hitbox[],] {
+function arrayEq<T>(l: T[], r: T[]): boolean { return l.length == r.length && l.every((v, i) => v == r[i]) }
+class Color {
+  constructor(public r: number, public g: number, public b: number) { }
+  static black(): Color { return new Color(0, 0, 0) }
+  static white(): Color { return new Color(255, 255, 255) }
+  static grey(): Color { return Color.black().blend(Color.white(), 0.55) }
+  static cyan(): Color { return new Color(0, 128, 255) }
+  blend(other: Color, ratio: number) { return new Color(this.r * (1 - ratio) + other.r * ratio, this.g * (1 - ratio) + other.g * ratio, this.b * (1 - ratio) + other.b * ratio,) }
+  stringify(): string { return `rgb(${this.r},${this.g},${this.b})` }
+}
+function generateTree({ nomai, position = [], setPosition, previousPosition, transition, visited, currentPosition, spiralArgs = {}, disable = false }:
+  { nomai: Nomai, currentPosition: number[] | undefined, position?: number[], setPosition: (position: number[]) => any, previousPosition: number[], transition: number, visited: number[][], disable?: boolean, spiralArgs?: Partial<SpiralArgs> }, strokes: Stroke[], hitboxes: Hitbox[]): [Stroke[], Hitbox[],] {
   const text = extractText(nomai.text);
   const args: SpiralArgs = {
     scale: 0.6, root: new Vec2(1, 0), rootAngle: 0, clockwise: false, textLength: text.length, ...spiralArgs
   }
   const spiral = new GoldenSpiral(args)
-  const color = disable ? "grey" : (position.every((p, i) => (currentPosition && currentPosition.length >= i && currentPosition?.[i] == p)) ? "white" : "cyan")
-  alphabet.translate(text, (t) => spiral.render(t), ([start, end]) => { strokes.push(new Stroke(start, end, color)); })
-  hitboxes.push(new Hitbox((p) => spiral.contains(p), () => { if (!disable) { setPosition(position) } }))
+  let previousColor = Color.black()
+  let newColor = Color.black()
+  if (!disable) {
+    newColor = Color.grey()
+  }
+  if (visited.some(p => arrayEq(p, position.slice(0, -1)))) {
+    previousColor = Color.grey()
+    newColor = Color.grey()
+  }
+  if (visited.some(p => arrayEq(p, position))) {
+    previousColor = Color.cyan()
+    newColor = Color.cyan()
+  }
+  if (arrayEq(previousPosition.slice(0, position.length), position)) {
+    previousColor = Color.white()
+  }
+  if (arrayEq((currentPosition || []).slice(0, position.length), position)) {
+    newColor = Color.white()
+  }
+  const color = previousColor.blend(newColor, transition);
+  alphabet.translate(text, (t) => spiral.render(t), ([start, end]) => { strokes.push(new Stroke(start, end, color.stringify())); })
+  hitboxes.push(new Hitbox((p) => spiral.contains(p), (e) => { if (!disable && e.buttons) { setPosition(position) } }))
   const next = nomai.next;
   next?.forEach((nomai, index) => {
     const anchor = spiral.render((index + 1) / (next.length + 1))
@@ -167,7 +196,8 @@ function generateTree({ nomai, position = [], setPosition, currentPosition, spir
       position: [...position, index],
       setPosition,
       currentPosition,
-      disable: position.some((v, i) => currentPosition?.[i] != v),
+      previousPosition, transition, visited,
+      disable: position.some((v, i) => currentPosition?.[i] != v) && !visited.some(v => arrayEq(position, v)),
       spiralArgs: {
         root: anchor,
         rootAngle: anchor.sub(spiral.shift).angle() - Math.PI / 2,
@@ -179,8 +209,12 @@ function generateTree({ nomai, position = [], setPosition, currentPosition, spir
   return [strokes, hitboxes]
 }
 
-function ButtonTree(args: { nomai: Nomai, currentPosition: number[] | undefined, position?: number[], setPosition: (position: number[]) => any, disable?: boolean }) {
-  const [strokes, hitboxes] = generateTree(args, [], [])
+function ButtonTree(args: { nomai: Nomai, currentPosition: number[] | undefined, position?: number[], setPosition: (position: number[]) => any, previousPosition: number[], transition: number, visited: number[][], disable?: boolean }) {
+  const root = new Vec2(1, -0.001);
+  const n = 0.05
+  const l = root.add(new Vec2(n * Math.cos(2 * Math.PI / 3), - n * Math.sin(2 * Math.PI / 3)))
+  const r = root.add(new Vec2(n * Math.cos(Math.PI / 3), - n * Math.sin(Math.PI / 3)))
+  const [strokes, hitboxes] = generateTree(args, [new Stroke(root, l), new Stroke(root, r), new Stroke(l, r), new Stroke(root, l.add(r).mul(0.5)), new Stroke(root.add(l).mul(0.5), r), new Stroke(l, r.add(root).mul(0.5)),], [])
   const div = useRef(null)
   const [[w, h], setWH] = useState([800, 600])
   useEffect(() => {
@@ -196,17 +230,38 @@ function Screen({ children }: { children: ReactElement }) {
   return <div style={{ fontFamily: "Consolas, monospace", width: "100%", marginTop: "10ex" }}>{children}</div>
 }
 
+let interval = null as any
 function TranslatorTool({ nomai }: { nomai: Nomai }) {
-  const [position, setPosition] = useState([] as number[])
+  const [animation, setAnimation] = useState({
+    position: [] as number[],
+    previous: [] as number[],
+    transition: 1,
+    visited: [[]] as number[][]
+  })
+  const setPosition = (position: number[]) => {
+    const newAnimation = { position, previous: animation.position, visited: animation.visited, transition: 0, }
+    clearInterval(interval)
+    interval = setInterval(() => {
+      newAnimation.transition += 1 / 16
+      setAnimation({ ...newAnimation })
+      if (newAnimation.transition >= 1) {
+        if (!newAnimation.visited.some(p => arrayEq(p, position))) {
+          newAnimation.visited.push(position)
+        }
+        clearInterval(interval)
+      }
+    }, 20)
+    setAnimation(animation)
+  }
   let selected: Nomai | undefined = nomai
-  for (const index of position) {
+  for (const index of animation.position) {
     selected = selected?.next?.[index]
   }
   if (!selected) {
     return <>You reached an easter egg! <button onClick={() => setPosition([])}>Get back to safety</button></>
   }
   return <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
-    <ButtonTree setPosition={setPosition} nomai={nomai} currentPosition={position} />
+    <ButtonTree setPosition={setPosition} nomai={nomai} currentPosition={animation.position} previousPosition={animation.previous} transition={animation.transition} visited={animation.visited} />
     <Screen>{selected.text}</Screen>
   </div>
 }
