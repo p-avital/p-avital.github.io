@@ -31,10 +31,12 @@ class GoldenSpiral {
   angle(r: number): number { return this.angleScale * this.beta * Math.log(r) + this.rootAngle }
   radius(angle: number): number {
     angle -= this.rootAngle
-    if (angle < 0) {
-      angle += 2 * Math.PI
-    }
     angle *= this.angleScale
+    if (angle < -2 * Math.PI) {
+      angle += 2 * Math.PI
+    } else if (angle > 0) {
+      angle -= 2 * Math.PI
+    }
     angle /= this.beta
     return Math.exp(angle) * this.scale
   }
@@ -63,14 +65,6 @@ class Stroke {
     public end: Vec2,
     public style: string = "white",
     public width: number = 1) { }
-}
-class Triangle {
-  constructor(
-    public a: Vec2,
-    public b: Vec2,
-    public c: Vec2
-  ) { }
-  contains(v: Vec2): boolean { return false }
 }
 class Hitbox {
   constructor(
@@ -162,9 +156,9 @@ function generateTree({ nomai, position = [], setPosition, currentPosition, spir
     scale: 0.6, root: new Vec2(1, 0), rootAngle: 0, clockwise: false, textLength: text.length, ...spiralArgs
   }
   const spiral = new GoldenSpiral(args)
-  const color = disable ? "grey" : (position.toString() == currentPosition?.toString() ? "white" : "cyan")
+  const color = disable ? "grey" : (position.every((p, i) => (currentPosition && currentPosition.length >= i && currentPosition?.[i] == p)) ? "white" : "cyan")
   alphabet.translate(text, (t) => spiral.render(t), ([start, end]) => { strokes.push(new Stroke(start, end, color)); })
-  hitboxes.push(new Hitbox((p) => spiral.contains(p), (e) => { if (!disable) { console.log({ position }); setPosition(position) } }))
+  hitboxes.push(new Hitbox((p) => spiral.contains(p), () => { if (!disable) { setPosition(position) } }))
   const next = nomai.next;
   next?.forEach((nomai, index) => {
     const anchor = spiral.render((index + 1) / (next.length + 1))
@@ -258,7 +252,10 @@ export default function Page() {
             Because if it wasn't, you should probably not go any further in this branch.</>,
           next: [{
             text: <>Really? You're sure you've played it? Outer Wilds is best experienced fully blind.<br />
-              If you haven't played it, please don't read this branch further.</>
+              If you haven't played it, please don't read this branch further.</>,
+            next: [{
+              text: <>Okay, I believe you. Time for  a gushing session then!</>
+            }]
           }]
         },
       ],

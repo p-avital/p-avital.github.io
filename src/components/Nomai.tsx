@@ -4,6 +4,7 @@ export class Vec2 {
 	constructor(x: number, y: number) { this.x = x; this.y = y }
 	add(other: Vec2): Vec2 { return new Vec2(this.x + other.x, this.y + other.y) }
 	sub(other: Vec2): Vec2 { return new Vec2(this.x - other.x, this.y - other.y) }
+	mul(scale: number) { return new Vec2(this.x * scale, this.y * scale) }
 	len(): number { return Math.sqrt(this.x * this.x + this.y * this.y) }
 	angle(): number { return Math.atan2(this.y, this.x) }
 }
