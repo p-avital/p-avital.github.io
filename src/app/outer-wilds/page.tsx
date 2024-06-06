@@ -45,7 +45,8 @@ class GoldenSpiral {
       r * Math.sin(angle) * this.scale
     )
   }
-  render(t: number): Vec2 { return this.unrooted(1 - (t * this.length)).add(this.shift) }
+  tToR(t: number): number { return 1 - (t * this.length) }
+  render(t: number): Vec2 { return this.unrooted(this.tToR(t)).add(this.shift) }
   contains(p: Vec2, margin?: number): boolean {
     p = p.sub(this.shift)
     const angle = p.angle()
@@ -61,7 +62,7 @@ class Stroke {
     public start: Vec2,
     public end: Vec2,
     public style: string = "white",
-    public width: number = 0.2) { }
+    public width: number = 1) { }
 }
 class Triangle {
   constructor(
@@ -105,6 +106,7 @@ function Canvas({ strokes, hitboxes, width, height, style }: { strokes: Stroke[]
       context.moveTo((stroke.start.x - minx) * scale, (stroke.start.y - miny) * scale);
       context.lineTo((stroke.end.x - minx) * scale, (stroke.end.y - miny) * scale);
       context.stroke()
+      context.beginPath()
     }
     const triggerHitbox = (event: React.MouseEvent<HTMLCanvasElement>) => {
       if (!event) { return }
@@ -116,7 +118,9 @@ function Canvas({ strokes, hitboxes, width, height, style }: { strokes: Stroke[]
         y / scale + miny
       )
       for (const hitbox of hitboxes) {
-        hitbox.checkAndRun(event, translated)
+        if (hitbox.predicate(translated)) {
+          return hitbox.callback(event)
+        }
       }
     }
     canvas.current.onmousemove = triggerHitbox
@@ -155,17 +159,43 @@ function extractText(component: ReactElement | string): string {
 function generateTree({ nomai, position = [], setPosition, currentPosition, spiralArgs = {}, disable = false }: { nomai: Nomai, currentPosition: number[] | undefined, position?: number[], setPosition: (position: number[]) => any, disable?: boolean, spiralArgs?: Partial<SpiralArgs> }, strokes: Stroke[], hitboxes: Hitbox[]): [Stroke[], Hitbox[],] {
   const text = extractText(nomai.text);
   const args: SpiralArgs = {
-    scale: 0.6, root: new Vec2(1, 0), rootAngle: 0, clockwise: true, textLength: text.length, ...spiralArgs
+    scale: 0.6, root: new Vec2(1, 0), rootAngle: 0, clockwise: false, textLength: text.length, ...spiralArgs
   }
   const spiral = new GoldenSpiral(args)
-  alphabet.translate(text, (t) => spiral.render(t), ([start, end]) => { strokes.push(new Stroke(start, end)); })
-  hitboxes.push(new Hitbox((p) => spiral.contains(p), (e) => { console.log(e.buttons) }))
+  const color = disable ? "grey" : (position.toString() == currentPosition?.toString() ? "white" : "cyan")
+  alphabet.translate(text, (t) => spiral.render(t), ([start, end]) => { strokes.push(new Stroke(start, end, color)); })
+  hitboxes.push(new Hitbox((p) => spiral.contains(p), (e) => { if (!disable) { console.log({ position }); setPosition(position) } }))
+  const next = nomai.next;
+  next?.forEach((nomai, index) => {
+    const anchor = spiral.render((index + 1) / (next.length + 1))
+    generateTree({
+      nomai,
+      position: [...position, index],
+      setPosition,
+      currentPosition,
+      disable: position.some((v, i) => currentPosition?.[i] != v),
+      spiralArgs: {
+        root: anchor,
+        rootAngle: anchor.sub(spiral.shift).angle() - Math.PI / 2,
+        scale: args.scale * 0.9,
+        clockwise: !args.clockwise
+      }
+    }, strokes, hitboxes)
+  })
   return [strokes, hitboxes]
 }
 
 function ButtonTree(args: { nomai: Nomai, currentPosition: number[] | undefined, position?: number[], setPosition: (position: number[]) => any, disable?: boolean }) {
   const [strokes, hitboxes] = generateTree(args, [], [])
-  return <Canvas strokes={strokes} hitboxes={hitboxes} width={800} height={1000} />
+  const div = useRef(null)
+  const [[w, h], setWH] = useState([window.innerWidth * 0.8, window.innerHeight * 0.6])
+  useEffect(() => {
+    if (!div?.current) { return }
+    setWH([(div.current as any).clientWidth, (div.current as any).clientHeight])
+  }, [div])
+  return <div style={{ width: "100%", height: "60vh" }} ref={div}>
+    <Canvas strokes={strokes} hitboxes={hitboxes} width={w} height={h} />
+  </div>
 }
 
 function Screen({ children }: { children: ReactElement }) {
@@ -181,7 +211,7 @@ function TranslatorTool({ nomai }: { nomai: Nomai }) {
   if (!selected) {
     return <>You reached an easter egg! <button onClick={() => setPosition([])}>Get back to safety</button></>
   }
-  return <div style={{ width: "100%" }}>
+  return <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
     <ButtonTree setPosition={setPosition} nomai={nomai} currentPosition={position} />
     <Screen>{selected.text}</Screen>
   </div>
