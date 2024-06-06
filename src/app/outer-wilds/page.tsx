@@ -182,7 +182,7 @@ function generateTree({ nomai, position = [], setPosition, currentPosition, spir
 function ButtonTree(args: { nomai: Nomai, currentPosition: number[] | undefined, position?: number[], setPosition: (position: number[]) => any, disable?: boolean }) {
   const [strokes, hitboxes] = generateTree(args, [], [])
   const div = useRef(null)
-  const [[w, h], setWH] = useState([window.innerWidth * 0.8, window.innerHeight * 0.6])
+  const [[w, h], setWH] = useState([800, 600])
   useEffect(() => {
     if (!div?.current) { return }
     setWH([(div.current as any).clientWidth, (div.current as any).clientHeight])
