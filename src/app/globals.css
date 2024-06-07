@@ -75,16 +75,13 @@
 
 * {
   box-sizing: border-box;
-  padding: 0;
-  margin: 0;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   text-align: justify;
 }
 
 html,
 body {
-  width: min(100vw, 60em);
-  overflow-x: hidden;
+  width: min(90lvw, 60em);
   margin: auto;
   min-height: 100vh;
 }
@@ -118,7 +115,7 @@ html {
 }
 
 code {
-  background-color: rgb(31, 32, 32);
+  background-color: rgb(51, 52, 52);
   font-family: var(--font-mono);
   padding: 0.1ex 0.6ex 0.1ex 0.6ex;
 }
@@ -128,4 +125,7 @@ p {
 }
 h2 {
   margin-top: 2ex;
+}
+h3 {
+  margin-top: 1ex;
 }

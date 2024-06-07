@@ -7,7 +7,13 @@ export interface ArticleHeader {
   link: string;
   tags: string[];
 }
+export interface Comment {
+  author: string;
+  date: Date;
+  comment: ReactElement;
+}
 export interface Article {
   header: ArticleHeader;
+  comments: Comment[];
   children: ReactElement | ReactElement[] | string;
 }

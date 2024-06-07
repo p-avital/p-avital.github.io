@@ -5,6 +5,65 @@ import Link from 'next/link';
 import { CSSProperties, ReactElement, useEffect, useRef, useState } from "react";
 import { alphabet, Vec2 } from '@/components/Nomai';
 
+
+export default function Page() {
+  return <Post header={header} comments={[
+    // {
+    // 	author: "YOUR NAME HERE",
+    // 	date: new Date("1984/06/21"),
+    // 	comment: <>YOUR COMMENT HERE</>
+    // }
+  ]}>
+    <>This article is built to emulate a core mechanic of the game: translating nomai text bit by bit.</>
+    <TranslatorTool nomai={{
+      text: <>Have you ever played a game that's since lived in your head rent-free?<br />
+        One that changes how you perceive some of the things around you?</>,
+      next: [
+        {
+          text: <>Outer Wilds is one of these games. It's done this to thousands of us.<br />
+            It's like a cognito-hazard, and now, I'm gonna infect you with it ::)</>,
+          next: [{
+            text: <>How can the Outer Wilds be described?</>,
+            next: [
+              { text: <>It's a five years old indie video game.</> },
+              {
+                text: <>It's an escape game... In space!</>,
+                next: [
+                  {
+                    text: <>What, you're already convinced?<br />Well, here's the <Link href="https://store.steampowered.com/app/753640/Outer_Wilds/">steam link</Link></>,
+                    next: [{
+                      text: <>Oh, if you're wondering: <em>Yes</em>, you should absolutely play the DLC!</>,
+                      next: [{
+                        text: <>But my opinion is that you'd better finish the base game before buying it.<br />
+                          Otherwise, you might lack context for some of its reveals.</>
+                      }]
+                    }]
+                  },
+                  {
+                    text: <>You'll explore a tiny stellar system in your rickety spaceship<br />
+                      Your goal? Uncover all of its secrets!</>
+                  }
+                ]
+              }
+            ]
+          }]
+        },
+        {
+          text: <>Oh? You have? Was it Outer Wilds?<br />
+            Because if it wasn't, you should probably not go any further in this branch.</>,
+          next: [{
+            text: <>Really? You're sure you've played it? Outer Wilds is best experienced fully blind.<br />
+              If you haven't played it, please don't read this branch further.</>,
+            next: [{
+              text: <>Okay, I believe you. Time for  a gushing session then!</>
+            }]
+          }]
+        },
+      ],
+    }} />
+  </Post>
+}
+
 interface SpiralArgs { textLength: number, root: Vec2, rootAngle: number, clockwise: boolean, scale: number }
 class GoldenSpiral {
   length: number
@@ -264,56 +323,4 @@ function TranslatorTool({ nomai }: { nomai: Nomai }) {
     <ButtonTree setPosition={setPosition} nomai={nomai} currentPosition={animation.position} previousPosition={animation.previous} transition={animation.transition} visited={animation.visited} />
     <Screen>{selected.text}</Screen>
   </div>
-}
-
-export default function Page() {
-  return <Post header={header}>
-    <>This article is built to emulate a core mechanic of the game: translating nomai text bit by bit.</>
-    <TranslatorTool nomai={{
-      text: <>Have you ever played a game that's since lived in your head rent-free?<br />
-        One that changes how you perceive some of the things around you?</>,
-      next: [
-        {
-          text: <>Outer Wilds is one of these games. It's done this to thousands of us.<br />
-            It's like a cognito-hazard, and now, I'm gonna infect you with it ::)</>,
-          next: [{
-            text: <>How can the Outer Wilds be described?</>,
-            next: [
-              { text: <>It's a five years old indie video game.</> },
-              {
-                text: <>It's an escape game... In space!</>,
-                next: [
-                  {
-                    text: <>What, you're already convinced?<br />Well, here's the <Link href="https://store.steampowered.com/app/753640/Outer_Wilds/">steam link</Link></>,
-                    next: [{
-                      text: <>Oh, if you're wondering: <em>Yes</em>, you should absolutely play the DLC!</>,
-                      next: [{
-                        text: <>But my opinion is that you'd better finish the base game before buying it.<br />
-                          Otherwise, you might lack context for some of its reveals.</>
-                      }]
-                    }]
-                  },
-                  {
-                    text: <>You'll explore a tiny stellar system in your ricketty spaceship<br />
-                      Your goal? Uncover all of its secrets!</>
-                  }
-                ]
-              }
-            ]
-          }]
-        },
-        {
-          text: <>Oh? You have? Was it Outer Wilds?<br />
-            Because if it wasn't, you should probably not go any further in this branch.</>,
-          next: [{
-            text: <>Really? You're sure you've played it? Outer Wilds is best experienced fully blind.<br />
-              If you haven't played it, please don't read this branch further.</>,
-            next: [{
-              text: <>Okay, I believe you. Time for  a gushing session then!</>
-            }]
-          }]
-        },
-      ],
-    }} />
-  </Post>
 }
