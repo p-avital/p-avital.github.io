@@ -38,11 +38,15 @@
   --callout-border-rgb: 172, 175, 176;
   --card-rgb: 180, 185, 188;
   --card-border-rgb: 131, 134, 135;
+
+  --code-background: rgb(228, 228, 228);
+  --link-color: royalblue;
+  --link-color-visited: rgb(97, 70, 202);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --foreground-rgb: 255, 255, 255;
+    --foreground-rgb: 220, 220, 220;
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
 
@@ -70,12 +74,16 @@
     --callout-border-rgb: 108, 108, 108;
     --card-rgb: 100, 100, 100;
     --card-border-rgb: 200, 200, 200;
+
+    --code-background: rgb(35, 35, 35);
+    --link-color: mediumvioletred;
+    --link-color-visited: violet;
   }
 }
 
 * {
   box-sizing: border-box;
-  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   text-align: justify;
 }
 
@@ -84,6 +92,9 @@ body {
   width: min(90lvw, 60em);
   margin: auto;
   min-height: 100vh;
+}
+main {
+  display: block;
 }
 .main {
   display: flex;
@@ -103,11 +114,11 @@ body {
 }
 
 a {
-  color: mediumvioletred;
+  color: var(--link-color);
   text-decoration: none;
 }
 a:visited {
-  color: violet;
+  color: var(--link-color-visited);
 }
 
 html {
@@ -115,7 +126,7 @@ html {
 }
 
 code {
-  background-color: rgb(51, 52, 52);
+  background-color: var(--code-background);
   font-family: var(--font-mono);
   padding: 0.1ex 0.6ex 0.1ex 0.6ex;
 }
@@ -126,6 +137,8 @@ p {
 h2 {
   margin-top: 2ex;
 }
+h2::before {content: "# ";}
 h3 {
   margin-top: 1ex;
 }
+h3::before {content: "## ";}
