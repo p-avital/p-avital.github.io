@@ -12,16 +12,16 @@ export default function Home() {
     <main className="main">
       <h1>The Fox's Den</h1>
       <section>
-        <h2>Welcome to my blog! Have some articles!</h2>
+        <b>Welcome to my blog! Have some articles!</b>
         <p>This is a blog about computer science, math, video games... All the nerd stuff!</p>
         <p>If you're wondering whose blog this is, you might be interested in my <Link href="/introductions">introduction post</Link>.</p>
         {tags.length ? <p>Tags: {tags.map(tag => <button key={tag} onClick={() => {
           const index = selectedTags.indexOf(tag);
           if (index === -1) { setSelectedTags([...selectedTags, tag]) } else { setSelectedTags([...selectedTags.slice(0, index), ...selectedTags.slice(index + 1)]) }
-        }} style={{ backgroundColor: selectedTags.includes(tag) ? "violet" : "black", margin: "0.4ex" }}>{tag}</button>)}</p> : <></>}
-        {articles.filter(({ tags }) => selectedTags.length == 0 || selectedTags.some(tag => tags.includes(tag))).map(({ title, publicationDate, summary, link, tags }) => <div key={link} style={{ border: "solid 1px black", borderRadius: "5px", padding: "1em", margin: "0.5em" }}>
+        }} style={{ backgroundColor: selectedTags.includes(tag) ? "violet" : "unset", margin: "0.4ex" }}>{tag}</button>)}</p> : <></>}
+        {articles.filter(({ tags }) => selectedTags.length == 0 || selectedTags.some(tag => tags.includes(tag))).map(({ title, publicationDate, summary, link, tags }) => <div key={link} style={{ marginBottom: "2em" }}>
           <div style={{ display: "flex", width: "100%", justifyContent: "space-between", marginBottom: "0.5em" }} >
-            <h3 style={{ maxWidth: "80%" }}><Link href={link}>{title}</Link></h3>
+            <h2 style={{ maxWidth: "80%" }}><Link href={link}>{title}</Link></h2>
             <LocaleDate date={publicationDate!} />
           </div>
           {summary}
