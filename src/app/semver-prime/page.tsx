@@ -17,7 +17,7 @@ export default function Page() {
 
 		<h2>SemVer Prime, or Gödel's SemVer</h2>
 		<p>SemVer Prime is a new way of doing SemVer, which puts more SemVers in your SemVer!</p>
-		<p>It works using prime numbers and a bit of madness: it works a bit like <Link href={"https://en.wikipedia.org/wiki/G%C3%B6del_numbering"}>Gödel's encoding</Link>. But an interactive demo is worth a thousand words:</p>
+		<p>It works using prime numbers and a bit of madness; a bit like <Link href={"https://en.wikipedia.org/wiki/G%C3%B6del_numbering"}>Gödel's encoding</Link>, really. But an interactive demo is worth a thousand words:</p>
 		<SemverPrime />
 
 		<h2>Hmm... Yes I see, this version number is made of version numbers!</h2>
@@ -47,10 +47,12 @@ export default function Page() {
 			<li>The next release can then bump the appropriate version dimensions as would normally be done.</li>
 		</ul>
 		<p>This transition version is SemVer-legal thanks to the fact that versions with differing majors are never expected to be compatible, but are allowed to. This means that seeing the major decrease, while surprising, is compliant thanks to the new number being guaranteed unique.</p>
+		<p>One can argue that this breaks the "bigger number = more recent" aspect of versioning that's usually expected of a version numbering system, and it's a very fair critique. However, due to the exponential growth of SemVer Prime's values, I tend to think of it as "not something a human should interact with in its 'compressed' form": comparing 10-ish digit numbers is surprisingly hard!</p>
+		<p>As such, SemVer Prime is mostly designed to allow compressing a set of versions into a single version number that interacts well with SemVer-based tools... Except for the ones that tell you which version is the "latest"...</p>
 
 		<h2>Conclusion</h2>
 		<p>While it is a lot more complicated than <Link href={"/humane-semver"}>Humane SemVer</Link>, Prime SemVer has the quality of allowing users to identify <em>what</em> changes have been enacted on their dependencies purely through version numbering alone. In fact, dividing a new version by the one you currently use (adding 1 to each before doing that) gives you a list of the dimensions that have changed!</p>
-		<p>I find this property awesome, and will personally endeavour to push projects I have a voice in to transition to Prime SemVer.</p>
+		<p>I find this property awesome, and will personally endeavour to push projects I have a voice in to transition to either Prime SemVer if they could also benefit from its mutli-dimensionality, or to <Link href={"/humane-semver"}>Humane SemVer</Link> if they don't.</p>
 		<p>And on that note: <Stabby />'s current release is <code>5.1.0</code>, which corresponds to <code>API="1.1.0" ABI="1.0.0"</code>, and this is now its full version decoding: <Stabby /> now officially follows Prime SemVer!</p>
 		<p>I leave you with a more convenient (and two-way) Prime SemVer translation tool:</p>
 		<Translator />
