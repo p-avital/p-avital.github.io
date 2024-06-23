@@ -35,7 +35,7 @@ export default function Page() {
 		<h2>The problems with SemVer (or how we're using it)</h2>
 		<p>Note that a lot of these gripes are not necessarily due to <Link href={"https://semver.org/"}>semver.org</Link>'s intent. However, I do find that the wording in that document is often counter-productive by being overly prescriptive; and I personally find their stance the whole "where does an OSS developer's responsibility start and end for work that they are making available for free" debate too extreme, but I'll try to avoid that subject so as to not detract from the point.</p>
 
-		<h3>The <code>1.0.0</code> falacy and the <code>0.x.y</code> trap</h3>
+		<h3 id="0_x_y">The <code>1.0.0</code> falacy and the <code>0.x.y</code> trap</h3>
 		<p>SemVer explicitly encourages you to stay in <code>0.x.y</code> until you've defined and stabilized your project's API; waiting until your API is defined and stable to declare <code>1.0.0</code>.</p>
 		<p>While the spirit behind this is to provide projects with a grace period in which everything flies, what this creates instead is a "fear" of getting to <code>MAJOR=1</code>: <em>"Once I hit <code>1.0.0</code>, I'll be stuck with the choices I've made until now... Am I really ready for that?"</em>.</p>
 		<p>In turn, this is very observable when looking at popular projects on <Link href={"https://crates.io"}>crates.io</Link>: of the top 10 most downloaded crates, 4 are still on <code>0.x.y</code> despite their API having been notoriously stable:</p>
