@@ -7,6 +7,7 @@ import { alphabet, Vec2 } from '@/components/Nomai';
 
 
 export default function Page() {
+  const [spoilers, setSpoilers] = useState(false)
   return <Post header={header} comments={[
     // {
     // 	author: "YOUR NAME HERE",
@@ -14,54 +15,104 @@ export default function Page() {
     // 	comment: <>YOUR COMMENT HERE</>
     // }
   ]}>
-    <>This article is built to emulate a core mechanic of the game: translating nomai text bit by bit.</>
-    <TranslatorTool nomai={{
-      text: <>Have you ever played a game that's since lived in your head rent-free?<br />
-        One that changes how you perceive some of the things around you?</>,
+    <>This article is built to emulate a core mechanic of the game: translating Nomai text bit by bit.<br />Click on spiral elements to start uncovering the article! (Hint: Nomai writing is best explored depth-first)</>
+    <TranslatorTool nomai={contents} spoilers={spoilers} />
+    <button style={{ marginTop: "12em" }} onClick={() => setSpoilers(!spoilers)}>Spoilers (show the entire wall, and translate everything "Reddit-style")</button>
+    {spoilers ? <Spoilers nomai={contents} /> : <></>}
+  </Post>
+}
+
+const contents = {
+  text: <>Have you ever played a game that's since lived in your head rent-free?<br />
+    One that changes how you perceive some of the things around you?</>,
+  next: [
+    {
+      text: <>Outer Wilds is one of these games. It's done this to thousands of us.<br />
+        It's like a cognito-hazard, and now, I'm gonna infect you with it ::)</>,
       next: [
         {
-          text: <>Outer Wilds is one of these games. It's done this to thousands of us.<br />
-            It's like a cognito-hazard, and now, I'm gonna infect you with it ::)</>,
-          next: [{
-            text: <>How can the Outer Wilds be described?</>,
-            next: [
-              { text: <>It's a five years old indie video game.</> },
-              {
-                text: <>It's an escape game... In space!</>,
-                next: [
-                  {
-                    text: <>What, you're already convinced?<br />Well, here's the <Link href="https://store.steampowered.com/app/753640/Outer_Wilds/">steam link</Link></>,
-                    next: [{
-                      text: <>Oh, if you're wondering: <em>Yes</em>, you should absolutely play the DLC!</>,
-                      next: [{
-                        text: <>But my opinion is that you'd better finish the base game before buying it.<br />
-                          Otherwise, you might lack context for some of its reveals.</>
-                      }]
-                    }]
-                  },
-                  {
-                    text: <>You'll explore a tiny stellar system in your rickety spaceship<br />
-                      Your goal? Uncover all of its secrets!</>
-                  }
-                ]
-              }
-            ]
-          }]
+          text: <>But just how incredible is this game?<br />
+            Well, it's incredible enough that I made a fully functional Nomai text simulator as homage.<br />
+            In the game, it's all based on textures, but this page actually works... Wanna know how I built it?</>,
+          next: [
+            {
+              text: <>Nomai writing is laid along spirals.</>,
+              next: [{
+                text: <>To do so, I've chosen spirals that follow the Golden Ratio, it just feels like what the Nomai would do.</>, anchor: 0.4,
+                next: [{
+                  text: <>For the most part, layout is rather automagical:<br />
+                    Each spiral's children rotate in the opposite direction, are 90% of their parent's size, and they branch out at even angles by default...<br />But I do have some manual overrides ;;)</>,
+                  invert: true,
+                  anchor: 0.45
+                }]
+              }]
+            },
+            {
+              text: <>Nomai writing has a very "polygonal" feel to it, so that's what inspired the character set!</>,
+              next: [
+                {
+                  anchor: 0.55,
+                  text: <>The entire canvas is rendered using the english text you're reading now.<br />The text is UTF-8 encoded, and then each byte is split into two nibbles, that are each rendered as a glyph.</>,
+                  next: [{ text: <>The glyphs themselves are polygons with missing sides</> }]
+                }
+              ]
+            }]
         },
         {
-          text: <>Oh? You have? Was it Outer Wilds?<br />
-            Because if it wasn't, you should probably not go any further in this branch.</>,
+          text: <>How can the Outer Wilds be described?</>,
+          next: [
+            { text: <>It's a indie video game from 2020.</>, anchor: 0.46, scale: 0.7 },
+            {
+              text: <>It's an escape game... In space!</>,
+              next: [
+                {
+                  text: <>What, you're already convinced?<br />Well, here's the <Link href="https://store.steampowered.com/app/753640/Outer_Wilds/">steam link</Link></>,
+                  next: [{
+                    text: <>Oh, if you're wondering: <em>Yes</em>, you should absolutely play the DLC!</>,
+                    next: [{
+                      text: <>But my opinion is that you'd better finish the base game before buying it.<br />
+                        Otherwise, you might lack context for some of its reveals.</>
+                    }]
+                  }]
+                },
+                {
+                  text: <>You'll explore a tiny stellar system in your rickety spaceship<br />
+                    Your goal? Uncover all of its secrets!</>,
+                  next: [{
+                    text: <>You'll soon find your species was not the first to explore its solar system.<br />But what happened to the Nomai whose writing system this page imitates?</>
+                  }, {
+                    text: <>You'll also find that there are multiple <em>fishy</em> things about your world.</>
+                  }]
+                }
+              ]
+            }
+          ]
+        }]
+    },
+    {
+      text: <>Oh? You have? Was it Outer Wilds?<br />
+        Because if it wasn't, you should probably not go any further in this branch.</>,
+      next: [{
+        text: <>Really? You're sure you've played it? Outer Wilds is best experienced fully blind.<br />
+          If you haven't played it, please don't read this branch further.</>,
+        next: [{
+          text: <>You know what? There are a lot of people that are way better with words that have said everything better than I ever could.<br />This post is mostly an excuse to implement Nomai writing!</>,
           next: [{
-            text: <>Really? You're sure you've played it? Outer Wilds is best experienced fully blind.<br />
-              If you haven't played it, please don't read this branch further.</>,
-            next: [{
-              text: <>Okay, I believe you. Time for  a gushing session then!</>
-            }]
+            text: <>If you speak French, I can't recommend <Link href="https://www.youtube.com/watch?v=Ss6vLmLcCbU">22 minutes pour sauver l'univers</Link> enough.</>
+          }, {
+            text: <>If you don't speak French, go experience other streamers' playthroughs!</>
           }]
-        },
-      ],
-    }} />
-  </Post>
+        }]
+      }]
+    },
+  ],
+}
+
+function Spoilers({ nomai }: { nomai: Nomai }) {
+  return <div style={{ paddingLeft: "1em", marginBottom: "1ex", borderLeft: "solid 1px white" }}>
+    {nomai.text}
+    {nomai.next?.map(nomai => Spoilers({ nomai }))}
+  </div>
 }
 
 interface SpiralArgs { textLength: number, root: Vec2, rootAngle: number, clockwise: boolean, scale: number }
@@ -184,6 +235,9 @@ function Canvas({ strokes, hitboxes, width, height, style }: { strokes: Stroke[]
 
 interface Nomai {
   text: ReactElement
+  anchor?: number,
+  scale?: number,
+  invert?: boolean,
   next?: Nomai[]
 }
 
@@ -218,8 +272,8 @@ class Color {
   blend(other: Color, ratio: number) { return new Color(this.r * (1 - ratio) + other.r * ratio, this.g * (1 - ratio) + other.g * ratio, this.b * (1 - ratio) + other.b * ratio,) }
   stringify(): string { return `rgb(${this.r},${this.g},${this.b})` }
 }
-function generateTree({ nomai, position = [], setPosition, previousPosition, transition, visited, currentPosition, spiralArgs = {}, disable = false }:
-  { nomai: Nomai, currentPosition: number[] | undefined, position?: number[], setPosition: (position: number[]) => any, previousPosition: number[], transition: number, visited: number[][], disable?: boolean, spiralArgs?: Partial<SpiralArgs> }, strokes: Stroke[], hitboxes: Hitbox[]): [Stroke[], Hitbox[],] {
+function generateTree({ nomai, position = [], setPosition, previousPosition, transition, visited, currentPosition, spiralArgs = {}, disable = false, spoilers = false }:
+  { nomai: Nomai, currentPosition: number[] | undefined, position?: number[], setPosition: (position: number[]) => any, previousPosition: number[], transition: number, visited: number[][], disable?: boolean, spiralArgs?: Partial<SpiralArgs>, spoilers: boolean }, strokes: Stroke[], hitboxes: Hitbox[]): [Stroke[], Hitbox[],] {
   const text = extractText(nomai.text);
   const args: SpiralArgs = {
     scale: 0.6, root: new Vec2(1, 0), rootAngle: 0, clockwise: false, textLength: text.length, ...spiralArgs
@@ -227,7 +281,7 @@ function generateTree({ nomai, position = [], setPosition, previousPosition, tra
   const spiral = new GoldenSpiral(args)
   let previousColor = Color.black()
   let newColor = Color.black()
-  if (!disable) {
+  if (!disable || spoilers) {
     newColor = Color.grey()
   }
   if (visited.some(p => arrayEq(p, position.slice(0, -1)))) {
@@ -249,7 +303,7 @@ function generateTree({ nomai, position = [], setPosition, previousPosition, tra
   hitboxes.push(new Hitbox((p) => spiral.contains(p), (e) => { if (!disable && e.buttons) { setPosition(position) } }))
   const next = nomai.next;
   next?.forEach((nomai, index) => {
-    const anchor = spiral.render((index + 1) / (next.length + 1))
+    const anchor = spiral.render(nomai.anchor ?? ((index + 1) / (next.length + 1)))
     generateTree({
       nomai,
       position: [...position, index],
@@ -260,27 +314,28 @@ function generateTree({ nomai, position = [], setPosition, previousPosition, tra
       spiralArgs: {
         root: anchor,
         rootAngle: anchor.sub(spiral.shift).angle() - Math.PI / 2,
-        scale: args.scale * 0.9,
-        clockwise: !args.clockwise
-      }
+        scale: (nomai.scale ?? 1) * args.scale * 0.9,
+        clockwise: !args.clockwise !== (nomai.invert ?? false)
+      },
+      spoilers
     }, strokes, hitboxes)
   })
   return [strokes, hitboxes]
 }
 
-function ButtonTree(args: { nomai: Nomai, currentPosition: number[] | undefined, position?: number[], setPosition: (position: number[]) => any, previousPosition: number[], transition: number, visited: number[][], disable?: boolean }) {
+function ButtonTree(args: { nomai: Nomai, currentPosition: number[] | undefined, position?: number[], setPosition: (position: number[]) => any, previousPosition: number[], transition: number, visited: number[][], disable?: boolean, spoilers: boolean }) {
   const root = new Vec2(1, -0.001);
   const n = 0.05
   const l = root.add(new Vec2(n * Math.cos(2 * Math.PI / 3), - n * Math.sin(2 * Math.PI / 3)))
   const r = root.add(new Vec2(n * Math.cos(Math.PI / 3), - n * Math.sin(Math.PI / 3)))
   const [strokes, hitboxes] = generateTree(args, [new Stroke(root, l), new Stroke(root, r), new Stroke(l, r), new Stroke(root, l.add(r).mul(0.5)), new Stroke(root.add(l).mul(0.5), r), new Stroke(l, r.add(root).mul(0.5)),], [])
   const div = useRef(null)
-  const [[w, h], setWH] = useState([800, 600])
+  const [[w, h], setWH] = useState([800, 400])
   useEffect(() => {
     if (!div?.current) { return }
     setWH([(div.current as any).clientWidth, (div.current as any).clientHeight])
   }, [div])
-  return <div style={{ width: "100%", height: "60vh" }} ref={div}>
+  return <div style={{ width: "100%", height: "40vh" }} ref={div}>
     <Canvas strokes={strokes} hitboxes={hitboxes} width={w} height={h} />
   </div>
 }
@@ -290,7 +345,7 @@ function Screen({ children }: { children: ReactElement }) {
 }
 
 let interval = null as any
-function TranslatorTool({ nomai }: { nomai: Nomai }) {
+function TranslatorTool({ nomai, spoilers }: { nomai: Nomai, spoilers: boolean }) {
   const [animation, setAnimation] = useState({
     position: [] as number[],
     previous: [] as number[],
@@ -320,7 +375,7 @@ function TranslatorTool({ nomai }: { nomai: Nomai }) {
     return <>You reached an easter egg! <button onClick={() => setPosition([])}>Get back to safety</button></>
   }
   return <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
-    <ButtonTree setPosition={setPosition} nomai={nomai} currentPosition={animation.position} previousPosition={animation.previous} transition={animation.transition} visited={animation.visited} />
+    <ButtonTree setPosition={setPosition} nomai={nomai} currentPosition={animation.position} previousPosition={animation.previous} transition={animation.transition} visited={animation.visited} spoilers={spoilers} />
     <Screen>{selected.text}</Screen>
   </div>
 }
