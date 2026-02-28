@@ -9,6 +9,11 @@ import { alphabet, Vec2 } from '@/components/Nomai';
 export default function Page() {
   const [spoilers, setSpoilers] = useState(false)
   return <Post header={header} comments={[
+    // {
+    // 	author: "YOUR NAME HERE",
+    // 	date: new Date("1984/06/21"),
+    // 	comment: <>YOUR COMMENT HERE</>
+    // }
     {
     	author: "fuzzypixelz",
     	date: new Date("2026/02/28"),
