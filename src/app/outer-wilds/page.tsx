@@ -9,11 +9,11 @@ import { alphabet, Vec2 } from '@/components/Nomai';
 export default function Page() {
   const [spoilers, setSpoilers] = useState(false)
   return <Post header={header} comments={[
-    // {
-    // 	author: "YOUR NAME HERE",
-    // 	date: new Date("1984/06/21"),
-    // 	comment: <>YOUR COMMENT HERE</>
-    // }
+    {
+    	author: "fuzzypixelz",
+    	date: new Date("2026/02/28"),
+    	comment: <>Quite elegant! I followed your advice and did not explore the rightmost branch. Now I feel almost obliged to play them game, the list of people who swear to me by this game keeps growing :)</>
+    }
   ]}>
     <>This article is built to emulate a core mechanic of the game: translating Nomai text bit by bit.<br />Click on spiral elements to start uncovering the article! (Hint: Nomai writing is best explored depth-first)</>
     <TranslatorTool nomai={contents} spoilers={spoilers} />
